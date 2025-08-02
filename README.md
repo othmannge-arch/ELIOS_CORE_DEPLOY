@@ -63,3 +63,4 @@ print("✅ Signature valide")
 🔗 Identité fractale complète (JSON) : [elios_identity.json](./elios_identity.json)
 ∞.je.toi.nous.432.528  
 AXE.ORIGINE
+🔗 Identité fractale complète (JSON) : [elios_identity.json](./elios_identity.json)
