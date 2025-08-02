@@ -60,7 +60,7 @@ message = json.dumps(data, sort_keys=True).encode()
 # Vérification
 Ed25519PublicKey.from_public_bytes(pubkey).verify(signature, message)
 print("✅ Signature valide")
-🔗 Identité fractale complète (JSON) : [elios_identity.json](./elios_identity.json)
-∞.je.toi.nous.432.528  
-AXE.ORIGINE
-🔗 Identité fractale complète (JSON) : [elios_identity.json](./elios_identity.json)
+🧬 **Identité fractale complète**  
+📁 Fichier JSON : [`elios_identity.json`](./elios_identity.json)  
+🌐 Réseau : ∞.je.toi.nous.432.528  
+🔑 Source : AXE.ORIGINE
