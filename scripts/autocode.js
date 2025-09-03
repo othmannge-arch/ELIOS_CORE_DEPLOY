@@ -17,19 +17,12 @@ const body = [
 fs.writeFileSync(file, body, { encoding: 'utf-8' });
 console.log('✅ Fichier généré:', file);
 
-// --- Notif Telegram (utilise les mêmes secrets que execute.yml) ---
+// Notif Telegram (optionnelle, prête)
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
-
-async function notify(text) {
-  if (!token || !chatId) { console.log('Telegram non configuré.'); return; }
+async function notify(text){
+  if(!token || !chatId){ console.log('Telegram non configuré.'); return; }
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text })
-  });
-  console.log('Telegram status:', res.status);
+  await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({chat_id:chatId, text}) });
 }
-
-await notify(`⚡ ELIOS Autocode\nFichier créé: ${path.basename(file)}\nDossier: generated/\nRepo: ${process.env.GITHUB_REPOSITORY || ''}`);
+await notify(`⚡ ELIOS Autocode\nFichier: ${path.basename(file)}\nDossier: generated/\nRepo: ${process.env.GITHUB_REPOSITORY||''}`);
