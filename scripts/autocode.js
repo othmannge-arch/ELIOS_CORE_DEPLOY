@@ -14,5 +14,6 @@ const body = [
   `- note: fichier généré automatiquement`
 ].join('\n');
 
-fs.writeFileSync(file, body, 'utf-8');
+// ⚡ Force l’écriture
+fs.writeFileSync(file, body, { encoding: 'utf-8' });
 console.log('✅ Fichier généré:', file);
