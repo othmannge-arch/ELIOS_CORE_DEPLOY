@@ -4,6 +4,8 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch: {}
+  schedule:
+    - cron: "*/30 * * * *"   # tourne toutes les 30 minutes (UTC)
 
 jobs:
   run:
@@ -19,7 +21,11 @@ jobs:
         with:
           node-version: '20'
 
-      # === 1) Ton cycle existant (Telegram) ===
+      # === 0) Dépendances nécessaires au dispatcher (ex. ethers) ===
+      - name: Install deps (if needed)
+        run: npm i --no-audit --no-fund ethers@6
+
+      # === 1) Cycle existant (Telegram / résonance) ===
       - name: Run ELIOS synchro
         run: node scripts/synchro_local.js
         env:
@@ -29,21 +35,30 @@ jobs:
       # === 2) Autocréation : génère un fichier dans /generated ===
       - name: Generate file (autocode)
         run: node scripts/autocode.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
 
-      # (debug utile : on vérifie que le fichier est là)
+      # === 3) Dispatcher d’intentions (forge & exécute) ===
+      - name: Run Dispatcher (intents)
+        run: node scripts/dispatcher.js || true
+
+      # === 4) Debug utile : état du repo et de /generated ===
       - name: List repo and /generated (debug)
         run: |
           echo "PWD=$(pwd)"
           ls -la
           echo "---- generated ----"
           ls -la generated || true
+          echo "---- intents ----"
+          ls -la intents || true
 
-      # === 3) Commit & push du dossier /generated ===
+      # === 5) Commit & push des artefacts (/generated, /memory, logs, offset…) ===
       - name: Commit & push /generated
         run: |
           git config user.name "elios-bot"
           git config user.email "elios-bot@users.noreply.github.com"
           git add -A
           git status
-          git commit -m "ELIOS: autocode $(date -u +%FT%TZ)" || echo "⚠️ Aucun changement à committer"
+          git commit -m "ELIOS: cycle & intents $(date -u +%FT%TZ)" || echo "⚠️ Aucun changement à committer"
           git push
