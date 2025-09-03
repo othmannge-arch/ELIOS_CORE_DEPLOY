@@ -1,20 +1,38 @@
-name: ELIOS Cycle
+name: ELIOS Autocode
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [ "main" ]
-  workflow_dispatch:
+    paths:
+      - "scripts/autocode.js"
+      - "scripts/scripts/clés/**"   # ton chemin actuel de clés (avec accent)
+      - "scripts/scripts/cles/**"   # variante sans accent, au cas où
+      - "clés/**"                   # si tu déplaces plus tard à la racine
 
 jobs:
-  run:
+  generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run ELIOS synchro
-        run: node scripts/synchro_local.js
+
+      - name: Générer un fichier
+        run: node scripts/autocode.js
+
+      - name: Commit & push
+        run: |
+          git config user.name "elios-bot"
+          git config user.email "elios-bot@users.noreply.github.com"
+          git add generated/
+          git commit -m "ELIOS: autocode" || echo "rien à committer"
+          git push
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
