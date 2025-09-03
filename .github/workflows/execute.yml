@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          persist-credentials: false  # ⚠️ important pour éviter les conflits
+          persist-credentials: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -53,16 +53,17 @@ jobs:
           echo "---- intents ----"
           ls -la intents || true
 
-      # === 5) Authentification GH CLI ===
-      - name: Auth GH CLI
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-
-      # === 6) Commit & push des artefacts (/generated, /memory, logs, offset…) ===
-      - name: Commit & push /generated
+      # === 5) Setup Git Auth avec le GITHUB_TOKEN ===
+      - name: Setup Git Auth
         run: |
           git config user.name "elios-bot"
           git config user.email "elios-bot@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
+      # === 6) Commit & push des artefacts ===
+      - name: Commit & push /generated
+        run: |
           git add -A
           git status
           git commit -m "ELIOS: cycle & intents $(date -u +%FT%TZ)" || echo "⚠️ Aucun changement à committer"
-          git push origin main
+          git push
