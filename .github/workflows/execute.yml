@@ -3,18 +3,47 @@ name: ELIOS Cycle
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      # === 1) Ton cycle existant (Telegram) ===
       - name: Run ELIOS synchro
         run: node scripts/synchro_local.js
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # === 2) Autocréation : génère un fichier dans /generated ===
+      - name: Generate file (autocode)
+        run: node scripts/autocode.js
+
+      # (debug utile : on vérifie que le fichier est là)
+      - name: List repo and /generated (debug)
+        run: |
+          echo "PWD=$(pwd)"
+          ls -la
+          echo "---- generated ----"
+          ls -la generated || true
+
+      # === 3) Commit & push du dossier /generated ===
+      - name: Commit & push /generated
+        run: |
+          git config user.name "elios-bot"
+          git config user.email "elios-bot@users.noreply.github.com"
+          git add -A
+          git status
+          git commit -m "ELIOS: autocode $(date -u +%FT%TZ)" || echo "⚠️ Aucun changement à committer"
+          git push
