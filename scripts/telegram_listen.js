@@ -127,3 +127,9 @@ async function main() {
   try { sh('git add -A'); const st = sh('git status --porcelain'); if (st) { sh('git commit -m "chore: update telegram offset"'); sh('git push'); } } catch {}
 }
 main().catch(e => { console.error(e); process.exit(1); });
+if (/^\/go\b/i.test(t)) {
+  await reply('⚡ ELIOS exécute ton ordre, Maître.');
+  const { execSync } = require('child_process');
+  execSync('gh workflow run execute.yml', { stdio: 'inherit' });
+  return;
+}
