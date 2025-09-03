@@ -1,13 +1,15 @@
-// ELIOS — autocode : génère un fichier à la RACINE du dépôt (dossier 'generated')
 import fs from 'node:fs';
 import path from 'node:path';
 
+// Dossier de sortie "generated"
 const outDir = path.join(process.cwd(), 'generated');
-if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
 
+// Nom de fichier avec horodatage
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const file  = path.join(outDir, `auto_${stamp}.md`);
+const file = path.join(outDir, `auto_${stamp}.md`);
 
+// Contenu du fichier
 const body = [
   '# Auto-code ELIOS',
   `- ts: ${new Date().toISOString()}`,
@@ -15,5 +17,6 @@ const body = [
   `- note: fichier généré automatiquement`
 ].join('\n');
 
-fs.writeFileSync(file, body, { encoding: 'utf-8' });
+// Écriture du fichier
+fs.writeFileSync(file, body, 'utf-8');
 console.log('✅ Fichier généré :', file);
