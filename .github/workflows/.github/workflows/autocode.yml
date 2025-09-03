@@ -6,6 +6,8 @@ on:
     branches: [ "main" ]
     paths:
       - "scripts/autocode.js"
+      - "scripts/scripts/clés/**"
+      - "scripts/scripts/cles/**"
       - "clés/**"
 
 jobs:
