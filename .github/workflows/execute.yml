@@ -62,7 +62,18 @@ jobs:
           git config user.name "elios-bot"
           git config user.email "elios-bot@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-
+      # === 6) Upload vers IPFS (Pinata) ===
+      - name: Upload to Pinata
+        run: |
+          FILE="generated/$(ls -t generated | head -n1)"
+          echo "⏫ Uploading $FILE to Pinata..."
+          curl -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+            -H "Authorization: Bearer ${{ secrets.PINATA_JWT }}" \
+            -F "file=@$FILE" \
+            -s -o result.json
+          cat result.json
+          CID=$(jq -r '.IpfsHash' result.json)
+          echo "🌐 IPFS: https://gateway.pinata.cloud/ipfs/$CID"
       # === 6) Commit & push des artefacts ===
       - name: Commit & push /generated
         run: |
