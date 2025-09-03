@@ -9,6 +9,8 @@ on:
 
 jobs:
   run:
+  permissions:
+  contents: write   # autorise le bot à pousser des commits
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
