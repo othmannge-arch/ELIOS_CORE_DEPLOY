@@ -21,6 +21,10 @@ jobs:
         with:
           node-version: '20'
 
+      # === Auth GH CLI pour exécution /go depuis Telegram ===
+      - name: Auth GH CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
       # === 0) Dépendances nécessaires au dispatcher (ex. ethers) ===
       - name: Install deps (if needed)
         run: npm i --no-audit --no-fund ethers@6
@@ -61,4 +65,4 @@ jobs:
           git add -A
           git status
           git commit -m "ELIOS: cycle & intents $(date -u +%FT%TZ)" || echo "⚠️ Aucun changement à committer"
-          git push
+          git
