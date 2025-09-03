@@ -15,4 +15,4 @@ const body = [
 ].join('\n');
 
 fs.writeFileSync(file, body, 'utf-8');
-console.log('Fichier généré:', file);
+console.log('✅ Fichier généré:', file);
