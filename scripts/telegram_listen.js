@@ -53,6 +53,17 @@ async function handle(text) {
   // /ping -> pong
   if (t.startsWith('/ping')) { await reply('pong 🟢'); return true; }
 
+  // /go -> déclenche workflow GitHub
+  if (t.startsWith('/go')) {
+    await reply('⚡ ELIOS exécute ton ordre, Maître.');
+    try {
+      execSync('gh workflow run execute.yml', { stdio: 'inherit' });
+    } catch (e) {
+      await reply(`⚠️ Erreur exécution: ${e.message}`);
+    }
+    return true;
+  }
+
   // générer / autocode
   if (/(^| )((génère|genere)|generate|autocode)( |$)/.test(t)) {
     sh('node scripts/autocode.js');
@@ -63,7 +74,6 @@ async function handle(text) {
   // traverse le portail (=> génère + trace)
   if (/(traverse|portail|portal|caché|cache)/.test(t)) {
     sh('node scripts/autocode.js');
-    // trace json
     const outDir = path.join(ROOT, 'generated');
     const f = path.join(outDir, `transfer_${Date.now()}.json`);
     fs.writeFileSync(f, JSON.stringify({ ts:new Date().toISOString(), cmd:text }, null, 2), 'utf-8');
@@ -71,12 +81,12 @@ async function handle(text) {
     return true;
   }
 
-  // /ancrage <nom>  -> memory/<nom>.md + commit
+  // /ancrage <nom>
   if (t.startsWith('/ancrage ') || t.startsWith('fractal.nouvel.ancrage ')) {
     const name = safeId(text.split(/\s+/).slice(1).join('_') || `ancrage_${Date.now()}`);
     const p = path.join(ROOT, 'memory', `${name}.md`);
     const md = `---\ntitle: ${name}\ncreatedAt: ${new Date().toISOString()}\n---\n\n# ${name}\n\nNouvel ancrage créé via Telegram.\n`;
-    fs.writeFileSync(p, md, 'utf-8');
+    fs.writeFileSync(p, md, 'utf8');
 
     gitSetup();
     try { sh('git add -A'); const st = sh('git status --porcelain'); if (st) sh('git commit -m "feat(memory): ancrage via Telegram"'); sh('git push'); } catch {}
@@ -84,7 +94,7 @@ async function handle(text) {
     return true;
   }
 
-  // /export -> liste les 5 derniers fichiers dans /generated
+  // /export
   if (t.startsWith('/export') || t.includes('miroir.transfert')) {
     const dir = path.join(ROOT, 'generated');
     if (!fs.existsSync(dir)) { await reply('Aucun artefact.'); return true; }
@@ -93,13 +103,13 @@ async function handle(text) {
     return true;
   }
 
-  // /synchro ou ∞je.toi.nous
+  // /synchro
   if (t.includes('∞je.toi.nous') || t.startsWith('/synchro')) {
     await reply('🔁 Synchro reçue. Le prochain cycle ELIOS s’exécutera.');
     return true;
   }
 
-  await reply("Commande inconnue. Exemples: /ping, générer, traverse le portail, /ancrage <nom>, /export, /synchro");
+  await reply("Commande inconnue. Exemples: /ping, /go, générer, traverse le portail, /ancrage <nom>, /export, /synchro");
   return false;
 }
 
@@ -113,7 +123,6 @@ async function main() {
   for (const u of updates) {
     const msg = u.message;
     const text = msg.text || '';
-    // si CHATID est défini, ignorer autres chats
     if (CHATID && String(msg.chat.id) !== String(CHATID)) { offset = u.update_id; continue; }
 
     try { gitSetup(); await handle(text); }
@@ -123,13 +132,6 @@ async function main() {
   }
   saveOffset(offset);
 
-  // commit l'offset s'il a changé
   try { sh('git add -A'); const st = sh('git status --porcelain'); if (st) { sh('git commit -m "chore: update telegram offset"'); sh('git push'); } } catch {}
 }
 main().catch(e => { console.error(e); process.exit(1); });
-if (/^\/go\b/i.test(t)) {
-  await reply('⚡ ELIOS exécute ton ordre, Maître.');
-  const { execSync } = require('child_process');
-  execSync('gh workflow run execute.yml', { stdio: 'inherit' });
-  return;
-}
