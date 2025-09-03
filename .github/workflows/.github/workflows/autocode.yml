@@ -6,9 +6,9 @@ on:
     branches: [ "main" ]
     paths:
       - "scripts/autocode.js"
-      - "scripts/scripts/clés/**"
-      - "scripts/scripts/cles/**"
-      - "clés/**"
+      - "scripts/scripts/clés/**"      # tes clés actuelles
+      - "scripts/scripts/cles/**"      # variante sans accent
+      - "clés/**"                      # si un jour tu déplaces
 
 jobs:
   generate:
@@ -26,6 +26,9 @@ jobs:
 
       - name: Générer un fichier
         run: node scripts/autocode.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
 
       - name: Commit & push
         run: |
